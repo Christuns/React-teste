@@ -1,0 +1,47 @@
+name: React CD - Deploy para GitHub Pages
+ 
+on:
+   push:
+       branches: ["main"]
+ 
+permissions:
+       contents: write
+       pages: write
+       id-token: write
+ 
+concurrency:
+        group: "pages"
+        cancel-in-progress: true
+ 
+jobs:
+    deploy:
+         environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+ 
+         runs-on: ubuntu-latest
+ 
+         steps:
+         - name: checkout do codigo
+           uses: actions/checkout@v4
+ 
+         - name: configura Node.js
+           uses: actions/setup-node@v4
+           with:
+               node-version: 20
+               cache: 'npm'
+ 
+         - name: Instalar dependencias
+           run: npm ci
+ 
+         - name: Build do projeto
+           run: npm run build
+ 
+         - name: Upload para github pages
+           uses: actions/upload-pages-artifact@v3
+           with:
+                 path: ./build
+ 
+         - name: Deploy para o github pages
+           id: deployment
+           uses: actions/deploy-pages@v4
